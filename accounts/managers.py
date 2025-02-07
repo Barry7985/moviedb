@@ -6,8 +6,8 @@ class UserManager(BaseUserManager):
                     password=None, **extra_fields):
         user = self.model(
             email=email, first_name=first_name,
-            last_name=last_name, **extra_fields
-            
+            last_name=last_name, **extra_fields,
+            related_name='custom_user_set',
         )
         user.set_password(password)
         user.save()

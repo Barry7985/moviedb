@@ -30,6 +30,16 @@ class CustomUser(AbstractUser):
     last_name = models.CharField(_('last name'), max_length=150)
     is_active = models.BooleanField(default=False)
     activation_token = models.CharField(max_length=100, blank=True)
+    groups = models.ManyToManyField(
+        'auth.Group', 
+        related_name='custom_user_set',
+        blank=True
+    )
+    user_permissions = models.ManyToManyField(
+        'auth.Permission', 
+        related_name='custom_user_set', 
+        blank=True
+    )
     
     objects = CustomUserManager()
     
