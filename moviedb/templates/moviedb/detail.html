@@ -1,0 +1,112 @@
+{% extends 'moviedb/base.html' %}  <!-- Étend le template de base home.html -->
+
+{% block content %}
+<div class="container my-5">
+    <!-- Section Détails du Film -->
+    <div class="row">
+        <!-- Affiche du Film -->
+        <div class="col-md-4">
+            <img src="{{ film.affiche.url }}" alt="{{ film.titre }}" class="img-fluid rounded shadow-lg movie-poster">
+        </div>
+
+        <!-- Informations du Film -->
+        <div class="col-md-8">
+            <h1 class="display-4">{{ film.titre }}</h1>
+            <div class="movie-meta mb-4">
+                <span class="me-3"><i class="fas fa-star text-warning"></i> {{ film.note_moyenne }}/5</span>
+                <span class="me-3"><i class="fas fa-clock"></i> {{ film.duree }} min</span>
+                <span class="me-3"><i class="fas fa-calendar"></i> {{ film.date_sortie|date:"Y" }}</span>
+            </div>
+
+            <!-- Synopsis -->
+            <p class="lead">{{ film.synopsis }}</p>
+
+            <!-- Genre et Casting -->
+            <div class="mb-4">
+                <h5>Genres</h5>
+                <div class="d-flex flex-wrap">
+                    {% for genre in film.genre.split %}
+                        <span class="genre-tag">{{ genre }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <h5>Casting</h5>
+                <p>{{ film.casting }}</p>
+            </div>
+
+            <!-- Boutons d'action -->
+            <div class="d-flex gap-3">
+                <button class="btn btn-watch"><i class="fas fa-play me-2"></i>Voir la bande-annonce</button>
+                <button class="btn btn-more"><i class="fas fa-plus me-2"></i>Ajouter à ma liste</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section Critiques -->
+    <div class="row mt-5">
+        <h2 class="section-title">Critiques</h2>
+        {% if critiques %}
+            {% for critique in critiques %}
+                <div class="col-md-6 mb-4">
+                    <div class="card movie-card">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ critique.titre }}</h5>
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="rating">
+                                    {% for _ in "12345" %}
+                                        {% if forloop.counter <= critique.note %}
+                                            <i class="fas fa-star"></i>
+                                        {% else %}
+                                            <i class="far fa-star"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                                <span class="rating-number ms-2">{{ critique.note }}/5</span>
+                            </div>
+                            <p class="card-text">{{ critique.texte }}</p>
+                            <small class="text-muted">Par {{ critique.utilisateur.username }} le {{ critique.date_publication|date:"d/m/Y" }}</small>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-muted">Aucune critique pour ce film pour le moment.</p>
+        {% endif %}
+    </div>
+
+    <!-- Section Commentaires -->
+    <div class="row mt-5">
+        <h2 class="section-title">Commentaires</h2>
+        {% if commentaires %}
+            {% for commentaire in commentaires %}
+                <div class="col-md-8 mb-4">
+                    <div class="card movie-card">
+                        <div class="card-body">
+                            <p class="card-text">{{ commentaire.texte }}</p>
+                            <small class="text-muted">Par {{ commentaire.utilisateur.username }} le {{ commentaire.date_publication|date:"d/m/Y" }}</small>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-muted">Aucun commentaire pour ce film pour le moment.</p>
+        {% endif %}
+    </div>
+
+    <!-- Formulaire pour ajouter un commentaire -->
+    <div class="row mt-5">
+        <h2 class="section-title">Ajouter un commentaire</h2>
+        <div class="col-md-8">
+            <form method="post" action="{% url 'ajouter_commentaire' film.id %}">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <textarea class="form-control" name="texte" rows="4" placeholder="Votre commentaire..." required></textarea>
+                </div>
+                <button type="submit" class="btn btn-watch"><i class="fas fa-paper-plane me-2"></i>Envoyer</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

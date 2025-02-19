@@ -1,0 +1,94 @@
+{% extends "moviedb/base.html" %}
+{% block content %}
+
+    <!-- Films Populaires -->
+    <section class="container my-5">
+        <h2 class="section-title">Films Populaires</h2>
+        <div class="row g-4">
+            <!-- Cartes de films -->
+            <div class="col-lg-3 col-md-6">
+                <div class="movie-card">
+                    <div class="position-relative">
+                        <img src="/api/placeholder/300/450" class="movie-poster" alt="Movie poster">
+                        <div class="trailer-button">
+                            <i class="fas fa-play"></i>
+                        </div>
+                        <div class="quick-actions">
+                            <button class="quick-action-btn">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                            <button class="quick-action-btn">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <button class="quick-action-btn">
+                                <i class="fas fa-share"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="progress-ring">
+                                <span>8.5</span>
+                            </div>
+                            <h5 class="card-title text-white mb-0">Titre du Film</h5>
+                        </div>
+                        <div class="genre-tags mb-3">
+                            <span class="genre-tag">
+                                <i class="fas fa-film"></i>
+                                Action
+                            </span>
+                            <span class="genre-tag">
+                                <i class="fas fa-rocket"></i>
+                                Sci-Fi
+                            </span>
+                        </div>
+                        <div class="movie-info-pill">
+                            <i class="fas fa-clock"></i>
+                            2h 35min
+                        </div>
+                        <div class="movie-info-pill">
+                            <i class="fas fa-star"></i>
+                            4.5/5
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Répéter pour d'autres films -->
+        </div>
+    </section>
+
+    <!-- Nouvelles cartes de statistiques -->
+    <div class="container my-5">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="stats-card text-center">
+                    <i class="fas fa-film"></i>
+                    <h3>2,500+</h3>
+                    <p>Films critiqués</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card text-center">
+                    <i class="fas fa-users"></i>
+                    <h3>50K+</h3>
+                    <p>Utilisateurs actifs</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card text-center">
+                    <i class="fas fa-star"></i>
+                    <h3>150K+</h3>
+                    <p>Critiques publiées</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card text-center">
+                    <i class="fas fa-trophy"></i>
+                    <h3>100+</h3>
+                    <p>Prix décernés</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
