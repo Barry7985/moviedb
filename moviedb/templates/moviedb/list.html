@@ -6,54 +6,61 @@
         <h2 class="section-title">Films Populaires</h2>
         <div class="row g-4">
             <!-- Cartes de films -->
-            <div class="col-lg-3 col-md-6">
-                <div class="movie-card">
-                    <div class="position-relative">
-                        <img src="/api/placeholder/300/450" class="movie-poster" alt="Movie poster">
-                        <div class="trailer-button">
-                            <i class="fas fa-play"></i>
-                        </div>
-                        <div class="quick-actions">
-                            <button class="quick-action-btn">
-                                <i class="fas fa-heart"></i>
-                            </button>
-                            <button class="quick-action-btn">
-                                <i class="fas fa-plus"></i>
-                            </button>
-                            <button class="quick-action-btn">
-                                <i class="fas fa-share"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="progress-ring">
-                                <span>8.5</span>
+            {% for film in films %}
+                <div class="col-lg-3 col-md-6">
+                    <div class="movie-card">
+                        <div class="position-relative">
+                            <!-- Affiche du film -->
+                            <img src="{{ film.affiche.url }}" class="movie-poster" alt="{{ film.titre }}">
+                            <!-- Bouton de lecture de la bande-annonce -->
+                            <div class="trailer-button">
+                                <i class="fas fa-play"></i>
                             </div>
-                            <h5 class="card-title text-white mb-0">Titre du Film</h5>
+                            <!-- Actions rapides -->
+                            <div class="quick-actions">
+                                <button class="quick-action-btn">
+                                    <i class="fas fa-heart"></i>
+                                </button>
+                                <button class="quick-action-btn">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                                <button class="quick-action-btn">
+                                    <i class="fas fa-share"></i>
+                                </button>
+                            </div>
                         </div>
-                        <div class="genre-tags mb-3">
-                            <span class="genre-tag">
-                                <i class="fas fa-film"></i>
-                                Action
-                            </span>
-                            <span class="genre-tag">
-                                <i class="fas fa-rocket"></i>
-                                Sci-Fi
-                            </span>
-                        </div>
-                        <div class="movie-info-pill">
-                            <i class="fas fa-clock"></i>
-                            2h 35min
-                        </div>
-                        <div class="movie-info-pill">
-                            <i class="fas fa-star"></i>
-                            4.5/5
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <!-- Note moyenne du film -->
+                                <div class="progress-ring">
+                                    <span>{{ film.note_moyenne }}</span>
+                                </div>
+                                <!-- Titre du film -->
+                                <h5 class="card-title text-white mb-0">{{ film.titre }}</h5>
+                            </div>
+                            <!-- Genres du film -->
+                            <div class="genre-tags mb-3">
+                                {% for genre in film.genre.split %}
+                                    <span class="genre-tag">
+                                        <i class="fas fa-film"></i>
+                                        {{ genre }}
+                                    </span>
+                                {% endfor %}
+                            </div>
+                            <!-- Durée du film -->
+                            <div class="movie-info-pill">
+                                <i class="fas fa-clock"></i>
+                                {{ film.duree }} min
+                            </div>
+                            <!-- Note moyenne -->
+                            <div class="movie-info-pill">
+                                <i class="fas fa-star"></i>
+                                {{ film.note_moyenne }}/5
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <!-- Répéter pour d'autres films -->
+            {% endfor %}
         </div>
     </section>
 
