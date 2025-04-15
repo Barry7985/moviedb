@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'accounts',
     'moviedb',
+    'api',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
