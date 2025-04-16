@@ -42,7 +42,6 @@ INSTALLED_APPS = [
     'moviedb',
     'api',
     'rest_framework',
-    'review',
 ]
 
 MIDDLEWARE = [
