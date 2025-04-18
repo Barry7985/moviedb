@@ -11,7 +11,15 @@
                     <div class="movie-card">
                         <div class="position-relative">
                             <!-- Affiche du film -->
-                            <img src="{{ film.affiche.url }}" class="movie-poster" alt="{{ film.titre }}">
+                            {% if film.affiche %}
+                                {% if film.affiche.url %}
+                                    <img src="{{ film.affiche.url }}" class="movie-poster" alt="{{ film.titre }}">
+                                {% else %}
+                                    <img src="{{ film.affiche }}" class="movie-poster" alt="{{ film.titre }}">
+                                {% endif %}
+                            {% else %}
+                                <img src="https://via.placeholder.com/300x450?text=No+Image" class="movie-poster" alt="No image">
+                            {% endif %}
                             <!-- Bouton de lecture de la bande-annonce -->
                             <div class="trailer-button">
                                 <i class="fas fa-play"></i>
@@ -33,29 +41,42 @@
                             <div class="d-flex align-items-center mb-3">
                                 <!-- Note moyenne du film -->
                                 <div class="progress-ring">
-                                    <span>{{ film.note_moyenne }}</span>
+                                    <span>{{ film.note_moyenne|default:"N/A" }}</span>
                                 </div>
                                 <!-- Titre du film -->
                                 <h5 class="card-title text-white mb-0">{{ film.titre }}</h5>
                             </div>
                             <!-- Genres du film -->
                             <div class="genre-tags mb-3">
-                                {% for genre in film.genre.split %}
-                                    <span class="genre-tag">
-                                        <i class="fas fa-film"></i>
-                                        {{ genre }}
-                                    </span>
-                                {% endfor %}
+                                {% if film.genre_list %}
+                                    {% for genre in film.genre_list %}
+                                        <span class="genre-tag">
+                                            <i class="fas fa-film"></i>
+                                            {{ genre }}
+                                        </span>
+                                    {% endfor %}
+                                {% elif film.genres %}
+                                    {% for genre in film.genres %}
+                                        <span class="genre-tag">
+                                            <i class="fas fa-film"></i>
+                                            {{ genre }}
+                                        </span>
+                                    {% endfor %}
+                                {% endif %}
                             </div>
                             <!-- Durée du film -->
                             <div class="movie-info-pill">
                                 <i class="fas fa-clock"></i>
-                                {{ film.duree }} min
+                                {% if film.duree %}
+                                    {{ film.duree }} min
+                                {% else %}
+                                    --
+                                {% endif %}
                             </div>
                             <!-- Note moyenne -->
                             <div class="movie-info-pill">
                                 <i class="fas fa-star"></i>
-                                {{ film.note_moyenne }}/5
+                                {{ film.note_moyenne|default:"-" }}/5
                             </div>
                         </div>
                     </div>

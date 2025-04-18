@@ -1,4 +1,4 @@
-{% extends 'moviedb/base.html' %}  <!-- Étend le template de base home.html -->
+{% extends 'moviedb/base.html' %}
 
 {% block content %}
 <div class="container my-5">
@@ -6,36 +6,45 @@
     <div class="row">
         <!-- Affiche du Film -->
         <div class="col-md-4">
-            <img src="{{ film.affiche.url }}" alt="{{ film.titre }}" class="img-fluid rounded shadow-lg movie-poster">
+            {% if film.affiche %}
+                {% if film.affiche.url %}
+                    <img src="{{ film.affiche.url }}" alt="{{ film.titre }}" class="img-fluid rounded shadow-lg movie-poster">
+                {% else %}
+                    <img src="{{ film.affiche }}" alt="{{ film.titre }}" class="img-fluid rounded shadow-lg movie-poster">
+                {% endif %}
+            {% else %}
+                <img src="https://via.placeholder.com/300x450?text=No+Image" alt="No image" class="img-fluid rounded shadow-lg movie-poster">
+            {% endif %}
         </div>
-
         <!-- Informations du Film -->
         <div class="col-md-8">
             <h1 class="display-4">{{ film.titre }}</h1>
             <div class="movie-meta mb-4">
-                <span class="me-3"><i class="fas fa-star text-warning"></i> {{ film.note_moyenne }}/5</span>
-                <span class="me-3"><i class="fas fa-clock"></i> {{ film.duree }} min</span>
+                <span class="me-3"><i class="fas fa-star text-warning"></i> {{ film.note_moyenne|default:"-" }}/5</span>
+                <span class="me-3"><i class="fas fa-clock"></i> {% if film.duree %}{{ film.duree }} min{% else %}--{% endif %}</span>
                 <span class="me-3"><i class="fas fa-calendar"></i> {{ film.date_sortie|date:"Y" }}</span>
             </div>
-
             <!-- Synopsis -->
             <p class="lead">{{ film.synopsis }}</p>
-
             <!-- Genre et Casting -->
             <div class="mb-4">
                 <h5>Genres</h5>
                 <div class="d-flex flex-wrap">
-                    {% for genre in film.genre.split %}
-                        <span class="genre-tag">{{ genre }}</span>
-                    {% endfor %}
+                    {% if film.genre %}
+                        {% for genre in film.genre.split "," %}
+                            <span class="genre-tag">{{ genre|trim }}</span>
+                        {% endfor %}
+                    {% elif film.genres %}
+                        {% for genre in film.genres %}
+                            <span class="genre-tag">{{ genre }}</span>
+                        {% endfor %}
+                    {% endif %}
                 </div>
             </div>
-
             <div class="mb-4">
                 <h5>Casting</h5>
-                <p>{{ film.casting }}</p>
+                <p>{{ film.casting|default:"-" }}</p>
             </div>
-
             <!-- Boutons d'action -->
             <div class="d-flex gap-3">
                 <button class="btn btn-watch"><i class="fas fa-play me-2"></i>Voir la bande-annonce</button>
@@ -43,7 +52,6 @@
             </div>
         </div>
     </div>
-
     <!-- Section Critiques -->
     <div class="row mt-5">
         <h2 class="section-title">Critiques</h2>
