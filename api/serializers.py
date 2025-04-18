@@ -6,7 +6,7 @@ from django.utils.timesince import timesince
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ('id', 'firstname', 'lastname', 'username', 'email')
+        fields = ('id', 'first_name', 'last_name', 'email')
         read_only_fields = fields
 
 class FilmSerializer(serializers.ModelSerializer):
