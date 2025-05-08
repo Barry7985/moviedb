@@ -1,0 +1,248 @@
+{% extends 'moviedb/base.html' %}
+{% load static %}
+
+{% block title %}MovieDB - Découvrez et Partagez vos Films Préférés{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero-section {
+        position: relative;
+        height: 80vh;
+        min-height: 600px;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        display: flex;
+        align-items: center;
+        color: white;
+        margin-bottom: 4rem;
+    }
+
+    .hero-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(to right, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.7) 50%, rgba(0,0,0,0.4) 100%);
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 1;
+        max-width: 600px;
+        padding: 2rem;
+    }
+
+    .hero-title {
+        font-size: 3.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    }
+
+    .hero-description {
+        font-size: 1.2rem;
+        margin-bottom: 2rem;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    }
+
+    .hero-buttons {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .hero-button {
+        padding: 0.8rem 2rem;
+        border-radius: 50px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: all 0.3s ease;
+    }
+
+    .hero-button-primary {
+        background-color: #e50914;
+        border: none;
+        color: white;
+    }
+
+    .hero-button-primary:hover {
+        background-color: #f40612;
+        transform: translateY(-2px);
+    }
+
+    .hero-button-secondary {
+        background-color: transparent;
+        border: 2px solid white;
+        color: white;
+    }
+
+    .hero-button-secondary:hover {
+        background-color: rgba(255,255,255,0.1);
+        transform: translateY(-2px);
+    }
+
+    .movie-card {
+        transition: transform 0.3s ease;
+        border: none;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .movie-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .movie-card img {
+        height: 300px;
+        object-fit: cover;
+    }
+
+    .section-title {
+        font-size: 2rem;
+        font-weight: 600;
+        margin-bottom: 2rem;
+        position: relative;
+        padding-bottom: 0.5rem;
+    }
+
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 50px;
+        height: 3px;
+        background-color: #e50914;
+    }
+
+    .review-card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
+    }
+
+    .review-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .contributor-card {
+        text-align: center;
+        padding: 1.5rem;
+        border-radius: 10px;
+        background-color: #f8f9fa;
+        transition: transform 0.3s ease;
+    }
+
+    .contributor-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .contributor-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        margin-bottom: 1rem;
+        object-fit: cover;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section" style="background-image: url('{{ featured_movie.affiche|default:'https://image.tmdb.org/t/p/original/wwemzKWzjKYJFfCeiB57q3r4Bcm.png' }}');">
+    <div class="hero-overlay"></div>
+    <div class="container">
+        <div class="hero-content">
+            <h1 class="hero-title">{{ featured_movie.titre|default:"Découvrez des Films Extraordinaires" }}</h1>
+            <p class="hero-description">{{ featured_movie.synopsis|default:"Explorez notre vaste collection de films, partagez vos critiques et découvrez de nouvelles œuvres cinématographiques."|truncatewords:30 }}</p>
+            <div class="hero-buttons">
+                <a href="{% url 'moviedb:film_list' %}" class="btn hero-button hero-button-primary">Explorer les Films</a>
+                <a href="{% url 'accounts:register' %}" class="btn hero-button hero-button-secondary">Rejoindre la Communauté</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Popular Movies Section -->
+<section class="container mb-5">
+    <h2 class="section-title">Films Populaires</h2>
+    <div class="row g-4">
+        {% for movie in popular_movies %}
+        <div class="col-md-3">
+            <div class="card movie-card h-100">
+                <img src="{{ movie.affiche|default:'https://via.placeholder.com/300x450' }}" class="card-img-top" alt="{{ movie.titre }}">
+                <div class="card-body">
+                    <h5 class="card-title">{{ movie.titre }}</h5>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="rating">
+                            {% for i in "12345" %}
+                            <i class="fas fa-star {% if forloop.counter <= movie.note_moyenne %}text-warning{% else %}text-muted{% endif %}"></i>
+                            {% endfor %}
+                        </div>
+                        <small class="text-muted">{{ movie.critiques.count }} critiques</small>
+                    </div>
+                </div>
+                <a href="{% url 'moviedb:movie_detail' movie.id %}" class="stretched-link"></a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- Recent Reviews Section -->
+<section class="container mb-5">
+    <h2 class="section-title">Dernières Critiques</h2>
+    <div class="row g-4">
+        {% for review in recent_reviews %}
+        <div class="col-md-6">
+            <div class="card review-card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <img src="{{ review.utilisateur.avatar.url|default:'https://via.placeholder.com/40' }}" 
+                             alt="{{ review.utilisateur.username }}" 
+                             class="rounded-circle me-3"
+                             width="40" height="40">
+                        <div>
+                            <h6 class="mb-0">{{ review.utilisateur.username }}</h6>
+                            <small class="text-muted">{{ review.date_publication|date:"d/m/Y" }}</small>
+                        </div>
+                    </div>
+                    <h5 class="card-title">
+                        <a href="{% url 'moviedb:movie_detail' review.film.id %}" class="text-decoration-none text-dark">
+                            {{ review.film.titre }}
+                        </a>
+                    </h5>
+                    <div class="mb-2">
+                        {% for i in "12345" %}
+                        <i class="fas fa-star {% if forloop.counter <= review.note %}text-warning{% else %}text-muted{% endif %}"></i>
+                        {% endfor %}
+                    </div>
+                    <p class="card-text">{{ review.contenu|truncatewords:30 }}</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- Top Contributors Section -->
+<section class="container mb-5">
+    <h2 class="section-title">Top Contributeurs</h2>
+    <div class="row g-4">
+        {% for contributor in top_contributors %}
+        <div class="col-md-3">
+            <div class="contributor-card">
+                <img src="{{ contributor.avatar.url|default:'https://via.placeholder.com/80' }}" 
+                     alt="{{ contributor.username }}" 
+                     class="contributor-avatar">
+                <h5 class="mb-1">{{ contributor.username }}</h5>
+                <p class="text-muted mb-0">{{ contributor.critiques.count }} critiques</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %} 

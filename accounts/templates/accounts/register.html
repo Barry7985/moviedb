@@ -1,5 +1,7 @@
-{% extends 'accounts/base.html' %}
+{% extends 'moviedb/base.html' %}
 {% load static %}
+
+{% block title %}Inscription{% endblock %}
 
 {% block content %}
 <div class="container mt-5">
@@ -50,7 +52,7 @@
                         </div>
                     </form>
                     <div class="text-center mt-3">
-                        <p>Déjà inscrit? <a href="{% url 'login' %}">Se connecter</a></p>
+                        <p>Déjà inscrit? <a href="{% url 'accounts:login' %}">Se connecter</a></p>
                     </div>
                 </div>
             </div>

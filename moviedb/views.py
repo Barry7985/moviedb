@@ -3,11 +3,13 @@ from django.urls import reverse
 from django.core.paginator import Paginator
 from itertools import chain
 from django.views.generic import ListView , DetailView
-from django.db.models import Q
+from django.db.models import Q, Count, Avg
 from django.contrib import messages
 from utils.myapi import TMDBServices
 from .models import Film, Critique, Commentaire
-from .forms import FilmFilterForm, SearchForm
+from .forms import FilmFilterForm, SearchForm, CommentaireForm
+from django.contrib.auth.decorators import login_required
+from accounts.models import CustomUser
 
 
 
@@ -124,3 +126,33 @@ def film_detail_tmdb(request, tmdb_id):
     else:
         messages.error(request, "Film non trouvé")
         return redirect('theater:film_list')
+
+def home(request):
+    # Get featured movie (highest rated)
+    featured_movie = Film.objects.annotate(
+        avg_rating=Avg('critiques__note')
+    ).order_by('-avg_rating').first()
+
+    # Get popular movies (most reviewed)
+    popular_movies = Film.objects.annotate(
+        review_count=Count('critiques')
+    ).order_by('-review_count')[:8]
+
+    # Get recent reviews
+    recent_reviews = Critique.objects.select_related(
+        'utilisateur', 'film'
+    ).order_by('-date_publication')[:4]
+
+    # Get top contributors
+    top_contributors = CustomUser.objects.annotate(
+        review_count=Count('critiques')
+    ).order_by('-review_count')[:4]
+
+    context = {
+        'featured_movie': featured_movie,
+        'popular_movies': popular_movies,
+        'recent_reviews': recent_reviews,
+        'top_contributors': top_contributors,
+    }
+    
+    return render(request, 'moviedb/home.html', context)

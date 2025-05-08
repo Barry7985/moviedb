@@ -16,6 +16,7 @@ from .serializers import (
     CreateCommentaireSerializer,
     FilmSerializer,
 )
+from django.db import models
 
 
 # Pagination for FilmViewSet
@@ -94,3 +95,28 @@ class CommentaireViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         """Automatically set the current user as the author of the comment."""
         serializer.save(utilisateur=self.request.user)
+
+def home(request):
+    """Render the home page with featured content."""
+    # Get featured movie (highest rated)
+    featured_movie = Film.objects.order_by('-rating').first()
+    
+    # Get popular movies (top 4 by rating)
+    popular_movies = Film.objects.order_by('-rating')[:4]
+    
+    # Get recent reviews (latest 4)
+    recent_reviews = Critique.objects.select_related('user', 'movie').order_by('-created_at')[:4]
+    
+    # Get top contributors (users with most reviews)
+    top_contributors = CustomUser.objects.annotate(
+        review_count=models.Count('critique')
+    ).order_by('-review_count')[:4]
+    
+    context = {
+        'featured_movie': featured_movie,
+        'popular_movies': popular_movies,
+        'recent_reviews': recent_reviews,
+        'top_contributors': top_contributors,
+    }
+    
+    return render(request, 'home.html', context)

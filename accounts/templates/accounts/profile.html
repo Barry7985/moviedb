@@ -1,0 +1,50 @@
+{% extends 'moviedb/base.html' %}
+
+{% block title %}Mon Profil{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <img src="{{ user.avatar.url|default:'https://via.placeholder.com/150' }}" 
+                         alt="Avatar" 
+                         class="rounded-circle mb-3"
+                         style="width: 150px; height: 150px; object-fit: cover;">
+                    <h3 class="card-title">{{ user.username }}</h3>
+                    <p class="text-muted">{{ user.email }}</p>
+                    <p class="text-muted">Membre depuis {{ user.date_joined|date:"d/m/Y" }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title mb-4">Mes Critiques</h4>
+                    {% if user.critiques.all %}
+                        {% for critique in user.critiques.all %}
+                            <div class="border-bottom pb-3 mb-3">
+                                <h5>
+                                    <a href="{% url 'moviedb:movie_detail' critique.film.id %}" class="text-decoration-none">
+                                        {{ critique.film.titre }}
+                                    </a>
+                                </h5>
+                                <div class="mb-2">
+                                    {% for i in "12345" %}
+                                        <i class="fas fa-star {% if forloop.counter <= critique.note %}text-warning{% else %}text-muted{% endif %}"></i>
+                                    {% endfor %}
+                                </div>
+                                <p class="text-muted">{{ critique.date_publication|date:"d/m/Y" }}</p>
+                                <p>{{ critique.contenu|truncatewords:50 }}</p>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted">Vous n'avez pas encore écrit de critiques.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

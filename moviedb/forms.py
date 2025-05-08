@@ -1,5 +1,5 @@
 from django import forms
-from .models import Film
+from .models import Film, Commentaire
 
 class FilmFilterForm(forms.Form):
     RATING_CHOICES = [
@@ -47,3 +47,15 @@ class SearchForm(forms.Form):
             'placeholder': 'Rechercher un film...'
         })
     )
+
+class CommentaireForm(forms.ModelForm):
+    class Meta:
+        model = Commentaire
+        fields = ['texte']
+        widgets = {
+            'texte': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Écrivez votre commentaire...'
+            })
+        }
