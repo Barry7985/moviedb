@@ -24,28 +24,46 @@ class FilmListView(ListView):
         self.query = self.request.GET.get('query', '')
         local_results = Film.objects.filter(Q(titre__icontains=self.query) | Q(synopsis__icontains=self.query)) if self.query else Film.objects.all()
         tmdb_results = TMDBServices.search_movie(self.query).get('results', []) if self.query else []
-        tmdb_films = [
-            {
+        
+        # Process TMDB results
+        tmdb_films = []
+        for tmdb_result in tmdb_results:
+            # Get full movie details including images
+            movie_details = TMDBServices.get_movie_details(tmdb_result['id'])
+            if movie_details:
+                poster_url = None
+                if movie_details.get('poster_path'):
+                    poster_url = TMDBServices.get_image_url(movie_details['poster_path'])
+                elif 'images' in movie_details and 'posters' in movie_details['images']:
+                    posters = movie_details['images']['posters']
+                    if posters:
+                        poster_url = TMDBServices.get_image_url(posters[0]['file_path'])
+
+                tmdb_films.append({
                 'id': tmdb_result['id'],
                 'titre': tmdb_result['title'],
                 'synopsis': tmdb_result['overview'],
-                'affiche': f"https://image.tmdb.org/t/p/w500{tmdb_result['poster_path']}" if tmdb_result['poster_path'] else None,
+                    'poster_url': poster_url,
                 'note_moyenne': tmdb_result['vote_average'],
-                'duree': tmdb_result.get('runtime', 0),
+                    'duree': movie_details.get('runtime', 0),
                 'date_sortie': tmdb_result['release_date'],
-                'genres': [genre['name'] for genre in tmdb_result.get('genres', [])],
-                'casting': '',
-                'is_tmdb': True,
-                'genre_list': [genre['name'] for genre in tmdb_result.get('genres', [])],
-            }
-            for tmdb_result in tmdb_results
-        ]
-        # Mark local results
+                    'genre': ', '.join([genre['name'] for genre in movie_details.get('genres', [])]),
+                    'casting': ', '.join([cast['name'] for cast in movie_details.get('credits', {}).get('cast', [])[:5]]),
+                    'tmdb_id': tmdb_result['id'],
+                    'is_tmdb': True
+                })
+
+        # Process local results
         local_results = list(local_results)
         for film in local_results:
             film.is_tmdb = False
-            # Add genre_list property for template compatibility
-            film.genre_list = [g.strip() for g in film.genre.split(',')] if film.genre else []
+            film.tmdb_id = None
+            if not film.poster_url and film.tmdb_id:
+                # Try to get poster from TMDB if we have a TMDB ID
+                movie_details = TMDBServices.get_movie_details(film.tmdb_id)
+                if movie_details and movie_details.get('poster_path'):
+                    film.poster_url = TMDBServices.get_image_url(movie_details['poster_path'])
+
         self.combined_results = list(chain(local_results, tmdb_films))
         paginator = Paginator(self.combined_results, self.paginate_by)
         page_number = self.request.GET.get('page')

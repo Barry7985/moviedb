@@ -8,7 +8,7 @@
         <!-- Movie Poster and Info -->
         <div class="col-md-4">
             <div class="card movie-card">
-                <img src="{{ film.affiche }}" class="card-img-top" alt="{{ film.titre }}"/>
+                <img src="{{ film.get_poster_url }}" class="card-img-top" alt="{{ film.titre }}" loading="lazy"/>
                 <div class="overlay">
                     <div class="rating-stars" data-rating="{{ film.note_moyenne }}">
                         {% for i in "12345" %}

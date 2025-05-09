@@ -3,54 +3,46 @@ from moviedb.models import Film, Critique, Commentaire
 from accounts.models import CustomUser
 from django.utils.timesince import timesince
 
-class CustomUserSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ('id', 'first_name', 'last_name', 'email')
-        read_only_fields = fields
+        fields = ['id', 'email', 'first_name', 'last_name', 'avatar', 'date_inscription']
+        read_only_fields = ['date_inscription']
 
 class FilmSerializer(serializers.ModelSerializer):
-    # Add calculated fields or methods if needed
+    critiques = serializers.SerializerMethodField()
+    
     class Meta:
         model = Film
-        fields = '__all__'
-        read_only_fields = ('note_moyenne',)
+        fields = ['id', 'titre', 'synopsis', 'genre', 'date_sortie', 'casting',
+                 'duree', 'affiche', 'note_moyenne', 'date_ajout', 'slug', 'critiques']
+        read_only_fields = ['note_moyenne', 'date_ajout', 'slug']
+    
+    def get_critiques(self, obj):
+        critiques = Critique.objects.filter(film=obj)
+        return CritiqueSerializer(critiques, many=True).data
 
 class CritiqueSerializer(serializers.ModelSerializer):
-    # Nested serializers for related fields
-    film = FilmSerializer(read_only=True)
-    utilisateur = CustomUserSerializer(read_only=True)
-    
-    # Human-readable time since publication
-    time_since_publication = serializers.SerializerMethodField()
-    time_since_modification = serializers.SerializerMethodField()
+    utilisateur = UserSerializer(read_only=True)
+    commentaires = serializers.SerializerMethodField()
     
     class Meta:
         model = Critique
-        fields = '__all__'
-        read_only_fields = ('date_publication', 'date_modification', 'utilisateur')
+        fields = ['id', 'film', 'utilisateur', 'titre', 'texte', 'note', 
+                 'date_publication', 'date_modification', 'commentaires']
+        read_only_fields = ['date_publication', 'date_modification']
     
-    def get_time_since_publication(self, obj):
-        return timesince(obj.date_publication)
-    
-    def get_time_since_modification(self, obj):
-        return timesince(obj.date_modification)
+    def get_commentaires(self, obj):
+        commentaires = Commentaire.objects.filter(critique=obj)
+        return CommentaireSerializer(commentaires, many=True).data
 
 class CommentaireSerializer(serializers.ModelSerializer):
-    # Nested serializers for related fields
-    critique = serializers.PrimaryKeyRelatedField(queryset=Critique.objects.all())
-    utilisateur = CustomUserSerializer(read_only=True)
-    
-    # Human-readable time since publication
-    time_since_publication = serializers.SerializerMethodField()
+    utilisateur = UserSerializer(read_only=True)
     
     class Meta:
         model = Commentaire
-        fields = '__all__'
-        read_only_fields = ('date_publication', 'utilisateur')
-    
-    def get_time_since_publication(self, obj):
-        return timesince(obj.date_publication)
+        fields = ['id', 'critique', 'utilisateur', 'texte', 'date_publication', 'est_modere']
+        read_only_fields = ['date_publication', 'est_modere']
 
 # For creating critiques (without nested representations)
 class CreateCritiqueSerializer(serializers.ModelSerializer):

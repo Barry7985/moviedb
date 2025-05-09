@@ -1,4 +1,5 @@
 {% extends 'moviedb/base.html' %}
+{% load moviedb_extras %}
 
 {% block content %}
 <div class="container my-5">
@@ -31,9 +32,11 @@
                 <h5>Genres</h5>
                 <div class="d-flex flex-wrap">
                     {% if film.genre %}
-                        {% for genre in film.genre.split "," %}
+                        {% with genres=film.genre|split:"," %}
+                            {% for genre in genres %}
                             <span class="genre-tag">{{ genre|trim }}</span>
                         {% endfor %}
+                        {% endwith %}
                     {% elif film.genres %}
                         {% for genre in film.genres %}
                             <span class="genre-tag">{{ genre }}</span>
@@ -107,13 +110,17 @@
     <div class="row mt-5">
         <h2 class="section-title">Ajouter un commentaire</h2>
         <div class="col-md-8">
-            <form method="post" action="{% url 'ajouter_commentaire' film.id %}">
+            {% if can_comment %}
+                <form method="post" action="{% url 'moviedb:film_detail' pk=film.id %}">
                 {% csrf_token %}
-                <div class="mb-3">
-                    <textarea class="form-control" name="texte" rows="4" placeholder="Votre commentaire..." required></textarea>
-                </div>
+                    {{ comment_form.as_p }}
                 <button type="submit" class="btn btn-watch"><i class="fas fa-paper-plane me-2"></i>Envoyer</button>
             </form>
+            {% else %}
+                <p class="text-muted">
+                    <a href="{{ login_url }}" class="text-decoration-none">Connectez-vous</a> pour ajouter un commentaire.
+                </p>
+            {% endif %}
         </div>
     </div>
 </div>

@@ -1,122 +1,481 @@
-{% extends "moviedb/base.html" %}
-{% block content %}
+{% extends 'moviedb/base.html' %}
+{% load static %}
+{% load moviedb_extras %}
 
-    <!-- Films Populaires -->
-    <section class="container my-5">
-        <h2 class="section-title">Films Populaires</h2>
-        <div class="row g-4">
-            <!-- Cartes de films -->
+{% block title %}Films - MovieDB{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'moviedb/css/list.css' %}">
+<style>
+    .search-section {
+        background: #f8f9fa;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+
+    .search-form {
+        max-width: 800px;
+        margin: 0 auto;
+        display: flex;
+        gap: 1rem;
+    }
+
+    .search-input {
+        flex: 1;
+        padding: 0.75rem 1rem;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        font-size: 1rem;
+    }
+
+    .search-button {
+        padding: 0.75rem 1.5rem;
+        background: #e50914;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    .search-button:hover {
+        background: #f40612;
+    }
+
+    .filter-section {
+        background: white;
+        padding: 1.5rem 0;
+        margin-bottom: 2rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .filter-form {
+        display: flex;
+        gap: 1.5rem;
+        align-items: center;
+        flex-wrap: wrap;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    .filter-group {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .filter-select {
+        padding: 0.5rem;
+        border: 1px solid #e9ecef;
+        border-radius: 4px;
+        background: white;
+        min-width: 150px;
+    }
+
+    .container {
+        max-width: 1600px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    .movie-grid {
+        padding: 2rem 0;
+    }
+
+    .movie-grid .container {
+        max-width: 1600px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    .grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2rem;
+        justify-content: flex-start;
+    }
+
+    .movie-card {
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
+        text-decoration: none;
+        color: inherit;
+        display: flex;
+        flex-direction: column;
+        width: 250px;
+        flex-shrink: 0;
+    }
+
+    .movie-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .poster-container {
+        position: relative;
+        width: 100%;
+        height: 375px;
+        background: #f8f9fa;
+        overflow: hidden;
+    }
+
+    .poster {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    .movie-card:hover .poster {
+        transform: scale(1.05);
+    }
+
+    .no-poster {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f8f9fa;
+        color: #adb5bd;
+        font-size: 2rem;
+    }
+
+    .tmdb-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: rgba(0,0,0,0.7);
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        z-index: 1;
+    }
+
+    .movie-info {
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        min-height: 100px;
+    }
+
+    .movie-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        line-height: 1.4;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .movie-meta {
+        margin-top: auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+
+    .rating {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .rating i {
+        color: #ffc107;
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1rem;
+        margin: 2rem 0;
+        flex-wrap: wrap;
+    }
+
+    .page-link {
+        padding: 0.5rem 1rem;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        color: #e50914;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .page-link:hover {
+        background: #e50914;
+        color: white;
+        border-color: #e50914;
+    }
+
+    .current-page {
+        padding: 0.5rem 1rem;
+        background: #f8f9fa;
+        border-radius: 4px;
+    }
+
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.9);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+    .scroll-top {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        background: #e50914;
+        color: white;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: none;
+        cursor: pointer;
+        display: none;
+        justify-content: center;
+        align-items: center;
+        transition: background-color 0.2s;
+    }
+
+    .scroll-top:hover {
+        background: #f40612;
+    }
+
+    @media (max-width: 1200px) {
+        .grid {
+            justify-content: center;
+        }
+    }
+
+    @media (max-width: 767px) {
+        .grid {
+            gap: 1rem;
+        }
+
+        .movie-card {
+            width: 200px;
+        }
+
+        .poster-container {
+            height: 300px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .movie-card {
+            width: 150px;
+        }
+
+        .poster-container {
+            height: 225px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Search Section -->
+<section class="search-section">
+    <div class="container">
+        <form action="{% url 'moviedb:film_list' %}" method="get" class="search-form">
+            <input type="text" name="q" class="search-input" placeholder="Rechercher un film sur TMDB..." value="{{ search_query }}">
+            <button type="submit" class="search-button">
+                <i class="fas fa-search"></i>
+            </button>
+        </form>
+    </div>
+</section>
+
+<!-- Filter Section -->
+<section class="filter-section">
+    <div class="container">
+        <form method="get" class="filter-form">
+            {% if search_query %}
+            <input type="hidden" name="q" value="{{ search_query }}">
+            {% endif %}
+            <div class="filter-group">
+                <label for="genre">Genre</label>
+                <select name="genre" id="genre" class="filter-select">
+                    <option value="">Tous les genres</option>
+                    {% for genre in genres %}
+                    <option value="{{ genre }}" {% if genre == selected_genre %}selected{% endif %}>{{ genre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="year">Année</label>
+                <select name="year" id="year" class="filter-select">
+                    <option value="">Toutes les années</option>
+                    {% for year in years %}
+                    <option value="{{ year|date:'Y' }}" {% if year|date:'Y' == selected_year %}selected{% endif %}>{{ year|date:'Y' }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="sort">Trier par</label>
+                <select name="sort" id="sort" class="filter-select">
+                    <option value="-date_sortie" {% if selected_sort == '-date_sortie' %}selected{% endif %}>Plus récent</option>
+                    <option value="date_sortie" {% if selected_sort == 'date_sortie' %}selected{% endif %}>Plus ancien</option>
+                    <option value="titre" {% if selected_sort == 'titre' %}selected{% endif %}>Titre A-Z</option>
+                    <option value="-titre" {% if selected_sort == '-titre' %}selected{% endif %}>Titre Z-A</option>
+                    <option value="-note_moyenne" {% if selected_sort == '-note_moyenne' %}selected{% endif %}>Meilleure note</option>
+                </select>
+            </div>
+            <button type="submit" class="filter-button">Filtrer</button>
+        </form>
+    </div>
+</section>
+
+<!-- Movie Grid -->
+<section class="movie-grid">
+    <div class="container">
+        {% if films %}
+        <div class="grid">
             {% for film in films %}
-                <div class="col-lg-3 col-md-6">
-                    <div class="movie-card">
-                        <div class="position-relative">
-                            <!-- Affiche du film -->
-                            {% if film.affiche %}
-                                {% if film.affiche.url %}
-                                    <img src="{{ film.affiche.url }}" class="movie-poster" alt="{{ film.titre }}">
-                                {% else %}
-                                    <img src="{{ film.affiche }}" class="movie-poster" alt="{{ film.titre }}">
-                                {% endif %}
-                            {% else %}
-                                <img src="https://via.placeholder.com/300x450?text=No+Image" class="movie-poster" alt="No image">
-                            {% endif %}
-                            <!-- Bouton de lecture de la bande-annonce -->
-                            <div class="trailer-button">
-                                <i class="fas fa-play"></i>
-                            </div>
-                            <!-- Actions rapides -->
-                            <div class="quick-actions">
-                                <button class="quick-action-btn">
-                                    <i class="fas fa-heart"></i>
-                                </button>
-                                <button class="quick-action-btn">
-                                    <i class="fas fa-plus"></i>
-                                </button>
-                                <button class="quick-action-btn">
-                                    <i class="fas fa-share"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <div class="d-flex align-items-center mb-3">
-                                <!-- Note moyenne du film -->
-                                <div class="progress-ring">
-                                    <span>{{ film.note_moyenne|default:"N/A" }}</span>
-                                </div>
-                                <!-- Titre du film -->
-                                <h5 class="card-title text-white mb-0">{{ film.titre }}</h5>
-                            </div>
-                            <!-- Genres du film -->
-                            <div class="genre-tags mb-3">
-                                {% if film.genre_list %}
-                                    {% for genre in film.genre_list %}
-                                        <span class="genre-tag">
-                                            <i class="fas fa-film"></i>
-                                            {{ genre }}
-                                        </span>
-                                    {% endfor %}
-                                {% elif film.genres %}
-                                    {% for genre in film.genres %}
-                                        <span class="genre-tag">
-                                            <i class="fas fa-film"></i>
-                                            {{ genre }}
-                                        </span>
-                                    {% endfor %}
-                                {% endif %}
-                            </div>
-                            <!-- Durée du film -->
-                            <div class="movie-info-pill">
-                                <i class="fas fa-clock"></i>
-                                {% if film.duree %}
-                                    {{ film.duree }} min
-                                {% else %}
-                                    --
-                                {% endif %}
-                            </div>
-                            <!-- Note moyenne -->
-                            <div class="movie-info-pill">
-                                <i class="fas fa-star"></i>
-                                {{ film.note_moyenne|default:"-" }}/5
-                            </div>
-                        </div>
+            <a href="{% url 'moviedb:film_detail' film.id %}" class="movie-card">
+                <div class="poster-container">
+                    <img src="{{ film.get_poster_url }}" 
+                         alt="{{ film.titre }}" 
+                         class="poster"
+                         loading="lazy"
+                         onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="no-poster" style="display: none;">
+                        <i class="fas fa-film"></i>
                     </div>
+                    {% if film.is_tmdb %}
+                    <div class="tmdb-badge">
+                        <i class="fas fa-database"></i> TMDB
+                    </div>
+                    {% endif %}
                 </div>
+                <div class="movie-info">
+                    <h3 class="movie-title">{{ film.titre }}</h3>
+                    <div class="movie-meta">
+                        {% if film.note_moyenne %}
+                        <span class="rating">
+                            <i class="fas fa-star"></i> {{ film.note_moyenne|floatformat:1 }}
+                        </span>
+                        {% endif %}
+                        {% if film.date_sortie %}
+                        <span class="year">{{ film.date_sortie|date:"Y" }}</span>
+                        {% endif %}
+                    </div>
+                    {% if film.genre %}
+                        <div class="genres">
+                            {% for genre in film.genre|split:"," %}
+                                <span class="genre-tag">{{ genre|trim }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    {% if film.casting %}
+                        <div class="casting">
+                            <i class="fas fa-users"></i> {{ film.casting }}
+                        </div>
+                    {% endif %}
+                </div>
+            </a>
             {% endfor %}
         </div>
-    </section>
 
-    <!-- Nouvelles cartes de statistiques -->
-    <div class="container my-5">
-        <div class="row">
-            <div class="col-md-3">
-                <div class="stats-card text-center">
-                    <i class="fas fa-film"></i>
-                    <h3>2,500+</h3>
-                    <p>Films critiqués</p>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="stats-card text-center">
-                    <i class="fas fa-users"></i>
-                    <h3>50K+</h3>
-                    <p>Utilisateurs actifs</p>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="stats-card text-center">
-                    <i class="fas fa-star"></i>
-                    <h3>150K+</h3>
-                    <p>Critiques publiées</p>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="stats-card text-center">
-                    <i class="fas fa-trophy"></i>
-                    <h3>100+</h3>
-                    <p>Prix décernés</p>
-                </div>
-            </div>
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <div class="pagination">
+            {% if page_obj.has_previous %}
+            <a href="?page=1{% if search_query %}&q={{ search_query }}{% endif %}{% if selected_genre %}&genre={{ selected_genre }}{% endif %}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}" class="page-link">
+                <i class="fas fa-angle-double-left"></i>
+            </a>
+            <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if selected_genre %}&genre={{ selected_genre }}{% endif %}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}" class="page-link">
+                <i class="fas fa-angle-left"></i>
+            </a>
+            {% endif %}
+
+            <span class="current-page">
+                Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}
+            </span>
+
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if selected_genre %}&genre={{ selected_genre }}{% endif %}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}" class="page-link">
+                <i class="fas fa-angle-right"></i>
+            </a>
+            <a href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&q={{ search_query }}{% endif %}{% if selected_genre %}&genre={{ selected_genre }}{% endif %}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}" class="page-link">
+                <i class="fas fa-angle-double-right"></i>
+            </a>
+            {% endif %}
         </div>
-    </div>
+        {% endif %}
 
+        {% else %}
+        <div class="no-results">
+            <i class="fas fa-search"></i>
+            <h2>Aucun film trouvé</h2>
+            <p>Essayez de modifier vos critères de recherche</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay">
+    <div class="spinner"></div>
+</div>
+
+<!-- Scroll to Top Button -->
+<button class="scroll-top" id="scrollTop">
+    <i class="fas fa-arrow-up"></i>
+</button>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Show loading overlay when form is submitted
+    const forms = document.querySelectorAll('form');
+    const loadingOverlay = document.querySelector('.loading-overlay');
+
+    forms.forEach(form => {
+        form.addEventListener('submit', () => {
+            loadingOverlay.style.display = 'flex';
+        });
+    });
+
+    // Scroll to top button
+    const scrollTopButton = document.getElementById('scrollTop');
+
+    window.addEventListener('scroll', () => {
+        if (window.pageYOffset > 300) {
+            scrollTopButton.style.display = 'flex';
+        } else {
+            scrollTopButton.style.display = 'none';
+        }
+    });
+
+    scrollTopButton.addEventListener('click', () => {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    });
+});
+</script>
 {% endblock %}

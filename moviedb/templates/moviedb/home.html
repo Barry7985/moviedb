@@ -152,7 +152,7 @@
 
 {% block content %}
 <!-- Hero Section -->
-<section class="hero-section" style="background-image: url('{{ featured_movie.affiche|default:'https://image.tmdb.org/t/p/original/wwemzKWzjKYJFfCeiB57q3r4Bcm.png' }}');">
+<section class="hero-section" style="background-image: url('{% if featured_movie.affiche %}{{ featured_movie.affiche.url }}{% else %}https://image.tmdb.org/t/p/original/wwemzKWzjKYJFfCeiB57q3r4Bcm.png{% endif %}');">
     <div class="hero-overlay"></div>
     <div class="container">
         <div class="hero-content">
@@ -173,7 +173,16 @@
         {% for movie in popular_movies %}
         <div class="col-md-3">
             <div class="card movie-card h-100">
-                <img src="{{ movie.affiche|default:'https://via.placeholder.com/300x450' }}" class="card-img-top" alt="{{ movie.titre }}">
+                <div class="poster-container">
+                    <img src="{{ movie.get_poster_url }}" 
+                         class="poster" 
+                         alt="{{ movie.titre }}"
+                         loading="lazy"
+                         onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="no-poster" style="display: none;">
+                        <i class="fas fa-film"></i>
+                    </div>
+                </div>
                 <div class="card-body">
                     <h5 class="card-title">{{ movie.titre }}</h5>
                     <div class="d-flex justify-content-between align-items-center">
@@ -185,7 +194,7 @@
                         <small class="text-muted">{{ movie.critiques.count }} critiques</small>
                     </div>
                 </div>
-                <a href="{% url 'moviedb:movie_detail' movie.id %}" class="stretched-link"></a>
+                <a href="{% url 'moviedb:film_detail' pk=movie.id %}" class="stretched-link"></a>
             </div>
         </div>
         {% endfor %}
@@ -211,7 +220,7 @@
                         </div>
                     </div>
                     <h5 class="card-title">
-                        <a href="{% url 'moviedb:movie_detail' review.film.id %}" class="text-decoration-none text-dark">
+                        <a href="{% url 'moviedb:film_detail' pk=review.film.id %}" class="text-decoration-none text-dark">
                             {{ review.film.titre }}
                         </a>
                     </h5>
